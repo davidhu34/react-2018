@@ -19,6 +19,7 @@
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
+    "connected-react-router": "^4.4.1",
     "history": "^4.7.2",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
@@ -27,6 +28,8 @@
     "react-router": "^4.3.1",
     "react-router-redux": "^5.0.0-alpha.9",
     "redux": "^4.0.0",
-    "redux-logger": "^3.0.6"
+    "redux-logger": "^3.0.6",
+    "semantic-ui-css": "^2.3.3",
+    "semantic-ui-react": "^0.82.2"
   }
 }

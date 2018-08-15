@@ -2,8 +2,9 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Route, withRouter } from 'react-router'
 
-import { pushRoute } from './actions'
+import { Button } from 'semantic-ui-react'
 
+import { pushRoute } from './actions'
 import Counter from './Counter'
 
 const Home = () => <div>Home Page</div>
@@ -19,9 +20,9 @@ const Main = ({
              Hello World.<br />
              <Counter />
         </h1>
-        <div onClick={() => pushRoute('/')}>Home</div>
-        <div onClick={() => pushRoute('/about')}>About</div>
-        <div onClick={() => pushRoute('/topics')}>Topics</div>
+        <Button onClick={() => pushRoute('/')}>Home</Button>
+        <Button onClick={() => pushRoute('/about')}>About</Button>
+        <Button onClick={() => pushRoute('/topics')}>Topics</Button>
         <Route exact path="/" component={Home} />
         <Route path="/about" component={About} />
         <Route path="/topics" component={Topics} />
