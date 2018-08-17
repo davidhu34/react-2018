@@ -5,10 +5,12 @@ import logger from 'redux-logger'
 
 import reducer from './reducers'
 
-const freshStore = (history) => {
+const freshStore = (history, sagaMiddleware) => {
     const middlewares = []
     middlewares.push( logger )
     middlewares.push( routerMiddleware(history) )
+    middlewares.push( sagaMiddleware )
+
     return createStore(
         connectRouter(history)(reducer),
         {},

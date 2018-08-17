@@ -32,6 +32,6 @@ const Main = ({
 export default withRouter(connect(
 	({ router }) => ({ router }),
     dispatch => ({
-        pushRoute: (route) => pushRoute(dispatch, route)
+        pushRoute: (route) => dispatch(pushRoute(route))
     })
 )(Main))
