@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { ConnectedRouter } from 'connected-react-router'
 import { hot } from 'react-hot-loader'
 
-import Main from './Main'
+import Main from './components/Main'
 
 const App = ({ store, history }) => (
    <Provider store={store} >
