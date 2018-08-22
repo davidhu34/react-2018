@@ -1,28 +1,48 @@
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
-import { Transition, config as springConfig } from 'react-spring'
+import { Spring, Transition, config as springConfig } from 'react-spring'
 
 
 class ImageWrap extends Component {
-	ref = {}
-	state = {}
-	src = ''
-	placeholderSrc = ''
+
+	buffer = null
+	onload = null
+
+	proportion = 1
+	imageStyle = {}
+	placeholderImageStyle = {}
 
 	constructor(props) {
 		super(props)
-		this.src = props.src
-		this.placeholderSrc = props.placeholderSrc
+
+		this.state = {
+			imageLoading: true,
+			imageLoaded: false
+		}
+
+		const { width, height, blur } = this.props
+		const imageStyleBase = (w,h) => ({
+			width: w + 'px',
+			height: h + 'px',
+			maxWidth: w + 'px'
+		})
+		this.imageStyle = imageStyleBase(width, height)
+		this.placeholderImageStyle = imageStyleBase(width - blur, height - blur)
+		this.proportion = width / height
+	}
+
+	componentWillMount() {
+		this.onload = this.onImageGet.bind(this)
 	}
 
 	componentDidMount() {
-		// console.log('loading')
-		this.setState({ imageLoading: true })
-		const buffer = new Image()
-        buffer.onload = () => this.onImageGet()
-        setTimeout( () => {
-			buffer.src = this.src
-		}, 3000);
+		this.buffer = new Image()
+        this.buffer.addEventListener('load', this.onload)
+		this.buffer.src = this.props.src
+	}
+
+	componentWillUnmount() {
+		this.buffer.removeEventListener('load', this.onload)
 	}
 
 	onImageGet() {
@@ -32,39 +52,57 @@ class ImageWrap extends Component {
 		})
 	}
 
-	fill(styles) {
+	fillStyle(edge = 0) {
 		return {
 			position: 'absolute',
 			width: '100%',
 			height: '100%',
-			...styles
+			paddingLeft: edge,
+			paddingTop: edge,
 		}
 	}
 
 	render() {
-		const { width, height } = this.props
+		const { width, height, blur, src, placeholderSrc } = this.props
 
+		const blurFilter = 'blur(' + blur + 'px)'
 		return <div style={{
 			width, height, padding: 0
 		}}>
-		<Transition config={ springConfig.slow }
-				from={{ opacity: 0 }} enter={{ opacity: 1 }} leave={{ opacity: 0 }}>
-			    { this.state.imageLoaded
-			        ? styles =>
-						<div style={this.fill(styles)}>
-							<img src={this.src}
-								style={{ maxWidth: width+'px'}} />
-						</div>
-					: styles =>
-						<div style={this.fill(styles)}>
-							{ this.placeholderSrc?
-								<img src={this.placeholderSrc}
-									style={{ maxWidth: width+'px'}} />
-								: 'Loader'
-							}
-						</div>
-			    }
-			</Transition>
+
+			<Spring config={ springConfig.slow }
+				from={{ opacity: 0, filter: blurFilter }}
+				to={ this.state.imageLoaded
+					? { opacity: 1, filter: 'blur(0px)' }
+					: { opacity: 1, filter: blurFilter }
+				}>
+				{ styles => { return placeholderSrc
+					? <div style={this.fillStyle(blur/2)}>
+						<img src={placeholderSrc}
+							style={{
+								...styles,
+								...this.placeholderImageStyle
+							}} />
+					</div>
+					: <div>Loader</div>
+				}}
+			</Spring>
+
+			<Spring from={{ opacity: 0 }}
+				to={ this.state.imageLoaded
+					? { opacity: 1 }
+					: { opacity: 0 }
+				}>
+				{ styles => <div style={this.fillStyle()}>
+						<img src={src}
+							style={{
+								...styles,
+								...this.imageStyle
+							}} />
+					</div>
+				}
+			</Spring>
+
 		</div>
 	}
 }

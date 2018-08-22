@@ -24,7 +24,7 @@ const Main = ({
         <Button onClick={() => pushRoute('/')}>Home</Button>
         <Button onClick={() => pushRoute('/about')}>About</Button>
         <Button onClick={() => pushRoute('/topics')}>Topics</Button>
-        <ImageWrap width={1024} height={540}
+        <ImageWrap width={1024} height={540} blur={10}
             src={'https://timedotcom.files.wordpress.com/2018/04/dtt4200_v519-1049.jpg'}
             placeholderSrc={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSl5vmPOtM8gmiNANElsT0PE4tvkrNSYR_93slvtlYk_1MbyYalLg'}/>
         <Route exact path="/" component={Home} />
