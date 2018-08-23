@@ -37,10 +37,12 @@ export default class ImageContainer extends Component {
 	}
 
 	onImageGet() {
+		setTimeout( () =>
 		this.setState({
 			imageLoaded: true,
 			imageLoading: false
 		})
+		,2000)
 	}
 
 	render() {

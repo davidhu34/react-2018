@@ -8,15 +8,26 @@ export default class StandaloneRender {
 	placeholderImageStyle = {}
 
     constructor(props) {
-		const { width, height, blur } = props
-		const imageStyleBase = (w,h) => ({
-			width: w + 'px',
-			height: h + 'px',
-			maxWidth: w + 'px'
-		})
-		this.imageStyle = imageStyleBase(width, height)
-		this.placeholderImageStyle = imageStyleBase(width - blur, height - blur)
-		this.proportion = width / height
+		const { width, height } = props
+		const blur = props.blur || 0
+
+		if (width && height) {
+			const imageStyleBase = (w,h) => ({
+				width: w + 'px',
+				height: h + 'px',
+				maxWidth: w + 'px'
+			})
+			this.imageStyle = imageStyleBase(width, height)
+			this.placeholderImageStyle = imageStyleBase(width - blur, height - blur)
+			this.proportion = width / height
+		} else {
+			const imageStyleFull = {
+				width: '100%',
+				height: '100%'
+			}
+			this.imageStyle = imageStyleFull
+			this.placeholderImageStyle = imageStyleFull
+		}
     }
 
     fillStyle = (edge = 0) => ({
@@ -28,9 +39,10 @@ export default class StandaloneRender {
     })
 
     run(state, props) {
-        const { width, height, blur, src, placeholderSrc } = props
-
+        const { width, height, src, placeholderSrc } = props
+		const blur = props.blur || 0
         const blurFilter = 'blur(' + blur + 'px)'
+
         return <div style={{
             width, height, padding: 0
         }}>
