@@ -1,7 +1,8 @@
 import React from 'react'
+import Camera from '../Camera'
 
 const Mobile = () => <div>
-    Mobile
+    <Camera />
 </div>
 
 export default Mobile

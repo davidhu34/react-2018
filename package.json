@@ -22,6 +22,7 @@
   "dependencies": {
     "connected-react-router": "^4.4.1",
     "history": "^4.7.2",
+    "jslib-html5-camera-photo": "^3.0.2-beta.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-hot-loader": "^4.3.3",
