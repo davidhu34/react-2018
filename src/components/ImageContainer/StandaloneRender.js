@@ -30,13 +30,16 @@ export default class StandaloneRender {
 		}
     }
 
-    fillStyle = (edge = 0) => ({
-    	position: 'absolute',
-    	width: '100%',
-    	height: '100%',
-    	paddingLeft: edge,
-    	paddingTop: edge,
-    })
+    fillStyle (props = {}) {
+		let edge = (props.blur || 0) / 2
+		return {
+	    	position: 'absolute',
+	    	width: props.width || '100%',
+	    	height: props.height || '100%',
+	    	paddingLeft: edge,
+	    	paddingTop: edge,
+		}
+    }
 
     run(state, props) {
         const { width, height, src, placeholderSrc } = props
@@ -54,14 +57,14 @@ export default class StandaloneRender {
                     : { opacity: 1, filter: blurFilter }
                 }>
                 { styles => { return placeholderSrc
-                    ? <div style={this.fillStyle(blur/2)}>
+                    ? <div style={this.fillStyle(props)}>
                         <img src={placeholderSrc}
                             style={{
                                 ...styles,
                                 ...this.placeholderImageStyle
                             }} />
                     </div>
-                    : <div>Loader</div>
+                    : <div style={this.fillStyle(props)}>Loading</div>
                 }}
             </Spring>
 

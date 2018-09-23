@@ -6,8 +6,9 @@ import ImageContainer from './ImageContainer'
 
 class Camera extends Component {
 
-    amRef = null
+    camRef = null
     state = {
+        active: false,
         front: false,
         width: null,
         height: null,
@@ -22,6 +23,7 @@ class Camera extends Component {
 
     componentDidMount () {
         this.cameraPhoto = new CameraPhoto(this.camRef)
+        this.startCamera()
     }
 
     switchFrontCamera(isFront) {
@@ -53,7 +55,11 @@ class Camera extends Component {
     stopCamera () {
         this.cameraPhoto.stopCamera()
             .then( () => {
-                this.setState({ active: false })
+                this.setState({
+                    active: false,
+                    front: false,
+                    snapshotURI: ''
+                })
                 console.log('Camera stopped!')
             })
             .catch( (error) => {
@@ -66,36 +72,63 @@ class Camera extends Component {
             snapshotURI: this.cameraPhoto.getDataUri(config)
         })
     }
+    clearSnapshot() {
+        if (this.state.active) this.setState({ snapshotURI: '' })
+    }
+
+    getCameraSettings() {
+        return this.cameraPhoto == null? {}
+            : this.cameraPhoto.getCameraSettings() || {}
+    }
 
     render () {
         let { front, snapshotURI } = this.state
-        return <div>
-            <Button onClick={ () => {
-                this.startCamera()
-            }}> Start environment facingMode resolution ideal </Button>
+        let { aspectRatio, frameRate, height, width } = this.getCameraSettings()
 
-            <Button onClick={ () => {
-                this.stopCamera()
-            }}> Stop </Button>
-
-            <Button onClick={ () => {
-                this.getSnapshot()
-            }}> snapshot </Button>
-
-            <Button onClick={ () => {
-                this.switchFrontCamera(!front)
-            }}> switch </Button>
-
+        return <div style={{
+            textAlign: 'center', position: 'relative'
+        }}>
             <video
+                style={{display: snapshotURI? 'none': 'inline-block'}}
                 ref={ ref => {this.camRef = ref} }
-                autoPlay="true"
+                autoPlay
                 playsInline
             />
 
             { snapshotURI
-                ? <ImageContainer standalone src={this.state.snapshotURI} />
+                ? <ImageContainer standalone
+                    src={this.state.snapshotURI}
+                    width={width} height={height} />
                 : null
             }
+
+            <div style={{
+                position: 'absolute',
+                bottom: 0,
+                width: '100%'
+            }}>
+                { snapshotURI
+                    ? <div>
+                        <Button onClick={ () => {
+                            this.clearSnapshot()
+                        }}> re-shoot </Button>
+                        <Button onClick={ () => {
+                            this.stopCamera()
+                        }}> use photo </Button>
+                    </div>
+                    : <div>
+                        <Button onClick={ () => {
+                            this.switchFrontCamera(!front)
+                        }}> switch </Button>
+                        <Button onClick={ () => {
+                            this.getSnapshot()
+                        }}> shoot </Button>
+                    </div>
+                }
+            </div>
+
+
+
         </div>
     }
 }
