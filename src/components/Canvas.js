@@ -9,35 +9,54 @@ class Canvas extends Component {
     }
 
     componentDidMount() {
-        const { registerCanvas, context, width, height } = this.props
+        const { context, width, height } = this.props
         console.log(width, height)
         if ( context == null ) {
+            console.log(this.ref)
             const _canvas = this.ref
             _canvas.width = width
             _canvas.height = height
             const ctx = _canvas.getContext('2d')
-
-        	ctx.strokeStyle = '#0dd00f'
+        	ctx.strokeStyle = 'aliceblue'
         	ctx.fillStyle = '#00000f'
-        	ctx.lineWidth = 15
+        	ctx.lineWidth = 5
         	ctx.lineJoin = 'round'
         	ctx.lineCap = 'round'
-            const x = 50
-            const y = 100
-            const x0 = 0
-    		const y0 = 0
-    		ctx.beginPath()
-    		ctx.moveTo(x0, y0)
-    		ctx.lineTo(x,y0)
-    		ctx.lineTo(x,y)
-    		ctx.lineTo(x0,y)
-    		ctx.lineTo(x0,y0)
-    		ctx.stroke()
-    		ctx.closePath()
         }
     }
 
+    clearCanvas() {
+        const _canvas = this.ref
+        const _context = _canvas.getContext('2d')
+        _context.clearRect(0, 0, _canvas.width, _canvas.height)
+    }
+
+    drawRectangle(rect) {
+        let { x0, y0, x1, y1 } = rect
+        const ctx = this.ref.getContext('2d')
+
+		ctx.beginPath()
+		ctx.moveTo(x0,y0)
+		ctx.lineTo(x1,y0)
+		ctx.lineTo(x1,y1)
+		ctx.lineTo(x0,y1)
+		ctx.lineTo(x0,y0)
+		ctx.stroke()
+		ctx.closePath()
+    }
+
     render () {
+        let { rectangles } = this.props
+
+        if (this.ref) {
+            this.clearCanvas()
+            if (rectangles.length) {
+                rectangles.forEach( rect => this.drawRectangle(rect) )
+            } else {
+                this.clearCanvas()
+            }
+        }
+
         return <canvas ref={ ref => { this.ref = ref } }
             style={this.props.style}
         />

@@ -8,13 +8,13 @@ import Canvas from './Canvas'
 class Camera extends Component {
 
     camRef = null
+    insightsInterval = null
     state = {
         active: false,
         front: false,
-        width: null,
-        height: null,
         snapshotURI: '',
-        insights: []
+        insights: [],
+        insightsTime: 0
     }
 
     constructor (props, context) {
@@ -30,14 +30,41 @@ class Camera extends Component {
 
     componentWillUnmount() {
         this.camRef = null
+        this.haltInsights()
     }
 
+    channelInsights() {
+        this.haltInsights()
+        this.insightsInterval = setInterval( () => this.collectInsights(), 100)
+    }
 
-    switchFrontCamera(isFront) {
-        let { active, front } = this.state
-        if (isFront != front) {
-            if (active) this.startCamera(isFront)
-            else this.setState({ front: isFront })
+    collectInsights() {
+        let time = (new Date).getTime()
+        let random = Number(time.toString().substr(-1))*100
+
+        setTimeout( () => {
+
+            if (this.insightsInterval && this.state.insightsTime < time) {
+                this.setState({
+                    insightsTime: time,
+                    insights: [1,2,3].map( (data, i) => ({
+                        x0: 10*data, y0: 10*data,
+                        x1: 10*data + 100, y1: 10*data + random/10,
+                    }))
+                })
+            }
+
+        }, random)
+    }
+
+    haltInsights() {
+        if (this.insightsInterval) {
+            clearInterval(this.insightsInterval)
+            this.insightsInterval = null
+            this.setState({
+                insightsTime: 0,
+                insights: []
+            })
         }
     }
 
@@ -48,9 +75,12 @@ class Camera extends Component {
 
         this.cameraPhoto.startCamera(mode, resolution)
             .then( () => {
-                if (this.camRef) this.setState({
-                    front, resolution, active: true
-                })
+                if (this.camRef) {
+                    this.channelInsights()
+                    this.setState({
+                        front, resolution, active: true
+                    })
+                }
                 console.log('Camera Started!', front? 'front': 'main')
             })
             .catch( (error) => {
@@ -60,6 +90,7 @@ class Camera extends Component {
     }
 
     stopCamera () {
+        this.haltInsights()
         this.cameraPhoto.stopCamera()
             .then( () => {
                 this.setState({
@@ -74,13 +105,27 @@ class Camera extends Component {
             })
     }
 
+    switchFrontCamera(isFront) {
+        let { active, front } = this.state
+        if (isFront != front) {
+            if (active) this.startCamera(isFront)
+            else this.setState({ front: isFront })
+        }
+    }
+
     getSnapshot(config = {}) {
-        if (this.state.active) this.setState({
-            snapshotURI: this.cameraPhoto.getDataUri(config)
-        })
+        if (this.state.active) {
+            this.haltInsights()
+            this.setState({
+                snapshotURI: this.cameraPhoto.getDataUri(config)
+            })
+        }
     }
     clearSnapshot() {
-        if (this.state.active) this.setState({ snapshotURI: '' })
+        if (this.state.active) {
+            this.setState({ snapshotURI: '' })
+            this.channelInsights()
+        }
     }
 
     getCameraSettings() {
@@ -95,7 +140,9 @@ class Camera extends Component {
         return <div style={{
             position: 'absolute',
             width: '100%',
+            height: height,
             textAlign: 'center',
+            padding: 'auto',
             backgroundColor: 'black'
         }}>
             <video ref={ ref => {this.camRef = ref} }
@@ -107,16 +154,16 @@ class Camera extends Component {
                 }}
             />
 
-            <div style={{
-                position: 'relative'
-            }}>
-                { snapshotURI
-                    ? <ImageContainer standalone
+
+            { snapshotURI
+                ? <div style={{ position: 'relative', }}>
+                    <ImageContainer standalone
+                        width={width} height={height}
                         src={this.state.snapshotURI}
-                        width={width} height={height} />
-                    : null
-                }
-            </div>
+                    />
+                </div>
+                : null
+            }
 
             <div style={{
                 position: 'absolute',
@@ -125,7 +172,7 @@ class Camera extends Component {
             }}>
                 { active
                     ? <Canvas
-                        objects={insights}
+                        rectangles={insights}
                         width={width}
                         height={height} />
                     : null
