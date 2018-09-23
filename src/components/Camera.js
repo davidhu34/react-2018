@@ -3,6 +3,7 @@ import CameraPhoto, { FACING_MODES, IMAGE_TYPES } from 'jslib-html5-camera-photo
 import { Button } from 'semantic-ui-react'
 
 import ImageContainer from './ImageContainer'
+import Canvas from './Canvas'
 
 class Camera extends Component {
 
@@ -12,7 +13,8 @@ class Camera extends Component {
         front: false,
         width: null,
         height: null,
-        snapshotURI: ''
+        snapshotURI: '',
+        insights: []
     }
 
     constructor (props, context) {
@@ -25,6 +27,11 @@ class Camera extends Component {
         this.cameraPhoto = new CameraPhoto(this.camRef)
         this.startCamera()
     }
+
+    componentWillUnmount() {
+        this.camRef = null
+    }
+
 
     switchFrontCamera(isFront) {
         let { active, front } = this.state
@@ -41,7 +48,7 @@ class Camera extends Component {
 
         this.cameraPhoto.startCamera(mode, resolution)
             .then( () => {
-                this.setState({
+                if (this.camRef) this.setState({
                     front, resolution, active: true
                 })
                 console.log('Camera Started!', front? 'front': 'main')
@@ -82,30 +89,53 @@ class Camera extends Component {
     }
 
     render () {
-        let { front, snapshotURI } = this.state
+        let { front, active, snapshotURI, insights } = this.state
         let { aspectRatio, frameRate, height, width } = this.getCameraSettings()
 
         return <div style={{
-            textAlign: 'center', position: 'relative'
+            position: 'absolute',
+            width: '100%',
+            textAlign: 'center',
+            backgroundColor: 'black'
         }}>
-            <video
-                style={{display: snapshotURI? 'none': 'inline-block'}}
-                ref={ ref => {this.camRef = ref} }
+            <video ref={ ref => {this.camRef = ref} }
                 autoPlay
                 playsInline
+                style={{
+                    display: snapshotURI? 'none': 'inline-block',
+                    position: 'relative'
+                }}
             />
 
-            { snapshotURI
-                ? <ImageContainer standalone
-                    src={this.state.snapshotURI}
-                    width={width} height={height} />
-                : null
-            }
+            <div style={{
+                position: 'relative'
+            }}>
+                { snapshotURI
+                    ? <ImageContainer standalone
+                        src={this.state.snapshotURI}
+                        width={width} height={height} />
+                    : null
+                }
+            </div>
 
             <div style={{
                 position: 'absolute',
-                bottom: 0,
-                width: '100%'
+                width: '100%',
+                top: 0
+            }}>
+                { active
+                    ? <Canvas
+                        objects={insights}
+                        width={width}
+                        height={height} />
+                    : null
+                }
+            </div>
+
+            <div style={{
+                position: 'absolute',
+                width: '100%',
+                bottom: 0
             }}>
                 { snapshotURI
                     ? <div>
@@ -126,8 +156,6 @@ class Camera extends Component {
                     </div>
                 }
             </div>
-
-
 
         </div>
     }
